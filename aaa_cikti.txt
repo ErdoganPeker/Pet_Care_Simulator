@@ -1,0 +1,6 @@
+Tur: aaa
+Ad: aaa
+Enerji: 60
+Mutluluk: 60
+Duygu Durumu: Mutlu
+Hayvan eklendi 

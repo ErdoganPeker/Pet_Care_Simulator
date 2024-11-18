@@ -1,0 +1,12 @@
+Tur: a
+Ad: a
+Enerji: 60
+Mutluluk: 60
+Duygu Durumu: Mutlu
+Hayvan eklendi 
+Tur: a
+Ad: a
+Enerji: 65
+Mutluluk: 65
+Duygu Durumu: Mutlu
+Hayvana su verildi 

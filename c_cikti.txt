@@ -1,0 +1,36 @@
+Tur: c
+Ad: c
+Enerji: 60
+Mutluluk: 60
+Duygu Durumu: Mutlu
+Hayvan eklendi 
+Tur: c
+Ad: c
+Enerji: 50
+Mutluluk: 55
+Duygu Durumu: Mutlu
+Hayvan temizlendi 
+Tur: c
+Ad: c
+Enerji: 50
+Mutluluk: 60
+Duygu Durumu: Mutlu
+Hayvana sevgi gosterildi 
+Tur: c
+Ad: c
+Enerji: 55
+Mutluluk: 60
+Duygu Durumu: Mutlu
+Hayvan uyutuldu 
+Tur: c
+Ad: c
+Enerji: 55
+Mutluluk: 70
+Duygu Durumu: Mutlu
+Hayvana odul verildi 
+Tur: c
+Ad: c
+Enerji: 70
+Mutluluk: 80
+Duygu Durumu: Mutlu
+Hayvana yemek verildi 

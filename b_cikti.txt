@@ -1,0 +1,12 @@
+Tur: b
+Ad: b
+Enerji: 60
+Mutluluk: 60
+Duygu Durumu: Mutlu
+Hayvan eklendi 
+Tur: b
+Ad: b
+Enerji: 45
+Mutluluk: 75
+Duygu Durumu: Mutlu
+Hayvan oyun oynatildi 

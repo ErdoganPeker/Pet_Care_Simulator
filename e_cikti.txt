@@ -1,0 +1,12 @@
+Tur: e
+Ad: e
+Enerji: 60
+Mutluluk: 60
+Duygu Durumu: Mutlu
+Hayvan eklendi 
+Tur: e
+Ad: e
+Enerji: 60
+Mutluluk: 65
+Duygu Durumu: Mutlu
+Hayvana sevgi gosterildi 

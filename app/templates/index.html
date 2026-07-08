@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pet Care Simulator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#050508;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.card{background:#13131f;border:1px solid #1e1e35;border-radius:20px;padding:2rem;max-width:400px;width:100%;box-shadow:0 0 60px #7c3aed11;text-align:center}
+.badge{display:inline-block;background:#7c3aed15;border:1px solid #7c3aed33;color:#7c3aed;border-radius:999px;padding:.25rem .75rem;font-size:.75rem;margin-bottom:1rem}
+h1{font-size:1.5rem;font-weight:800;margin-bottom:.25rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pet-emoji{font-size:5rem;margin:1.5rem 0;display:block;animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.pet-name{font-size:1.25rem;font-weight:700;margin-bottom:.25rem}
+.pet-status{font-size:.9rem;color:#94a3b8;margin-bottom:1.5rem}
+.stat{margin-bottom:.9rem;text-align:left}
+.stat-header{display:flex;justify-content:space-between;font-size:.75rem;color:#94a3b8;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.05em}
+.bar{background:#0e0e16;border-radius:999px;height:8px}
+.fill{height:8px;border-radius:999px;transition:width .5s ease}
+.fill.hunger{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+.fill.happy{background:linear-gradient(90deg,#00d4ff,#7c3aed)}
+.fill.clean{background:linear-gradient(90deg,#10b981,#00d4ff)}
+.fill.energy{background:linear-gradient(90deg,#7c3aed,#f59e0b)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:1.5rem}
+.btn{padding:.75rem;border:none;border-radius:10px;cursor:pointer;font-size:.85rem;font-weight:700;transition:transform .1s}
+.btn:active{transform:scale(.96)}
+.btn.feed{background:#f59e0b20;border:1px solid #f59e0b40;color:#f59e0b}
+.btn.play{background:#00d4ff20;border:1px solid #00d4ff40;color:#00d4ff}
+.btn.clean{background:#10b98120;border:1px solid #10b98140;color:#10b981}
+.btn.sleep{background:#7c3aed20;border:1px solid #7c3aed40;color:#7c3aed}
+</style>
+</head>
+<body>
+<div class="card">
+  <span class="badge">🐾 C Pet Game</span>
+  <h1>Pet Care Simulator</h1>
+  <span class="pet-emoji" id="pet-emoji">{{emoji}}</span>
+  <div class="pet-name" id="pet-name">{{pet.name}}</div>
+  <div class="pet-status" id="pet-status">{{status}}</div>
+  <div class="stat">
+    <div class="stat-header"><span>🍖 Hunger</span><span id="h-val">{{pet.hunger|int}}%</span></div>
+    <div class="bar"><div class="fill hunger" id="h-bar" style="width:{{pet.hunger|int}}%"></div></div>
+  </div>
+  <div class="stat">
+    <div class="stat-header"><span>😊 Happiness</span><span id="hp-val">{{pet.happiness|int}}%</span></div>
+    <div class="bar"><div class="fill happy" id="hp-bar" style="width:{{pet.happiness|int}}%"></div></div>
+  </div>
+  <div class="stat">
+    <div class="stat-header"><span>🛁 Cleanliness</span><span id="c-val">{{pet.cleanliness|int}}%</span></div>
+    <div class="bar"><div class="fill clean" id="c-bar" style="width:{{pet.cleanliness|int}}%"></div></div>
+  </div>
+  <div class="stat">
+    <div class="stat-header"><span>⚡ Energy</span><span id="e-val">{{pet.energy|int}}%</span></div>
+    <div class="bar"><div class="fill energy" id="e-bar" style="width:{{pet.energy|int}}%"></div></div>
+  </div>
+  <div class="actions">
+    <button class="btn feed" onclick="act('feed')">🍖 Feed</button>
+    <button class="btn play" onclick="act('play')">🎮 Play</button>
+    <button class="btn clean" onclick="act('clean')">🛁 Clean</button>
+    <button class="btn sleep" onclick="act('sleep')">😴 Sleep</button>
+  </div>
+</div>
+<script>
+async function act(action){
+  const r=await fetch('/action/'+action,{method:'POST'});
+  const j=await r.json();
+  const p=j.pet;
+  document.getElementById('pet-emoji').textContent=j.emoji;
+  document.getElementById('pet-status').textContent=j.status;
+  ['h','hp','c','e'].forEach((k,i)=>{
+    const vals=[p.hunger,p.happiness,p.cleanliness,p.energy];
+    const v=Math.round(vals[i]);
+    document.getElementById(k+'-val').textContent=v+'%';
+    document.getElementById(k+'-bar').style.width=v+'%';
+  });
+}
+</script>
+</body>
+</html>

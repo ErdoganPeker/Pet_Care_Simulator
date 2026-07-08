@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-import uvicorn, time
+import uvicorn, time, os
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+_dir = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(_dir, "templates"))
 
 pet = {"name":"Fluffy","type":"cat","hunger":70,"happiness":65,"cleanliness":80,"energy":75}
 last = [time.time()]

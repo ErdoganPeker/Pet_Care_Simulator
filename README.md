@@ -1,90 +1,86 @@
 # Pet Care Simulator
 
-![C](https://img.shields.io/badge/C-99-A8B9CC?style=flat&logo=c&logoColor=white)
-![Game Logic](https://img.shields.io/badge/Type-Virtual%20Pet%20Simulator-ff6b6b?style=flat)
-![Algorithm](https://img.shields.io/badge/Algorithm-State%20Machine-8b5cf6?style=flat)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=flat&logo=fastapi&logoColor=white)
+![Jinja2](https://img.shields.io/badge/Templating-Jinja2-B41717?style=flat&logo=jinja&logoColor=white)
+![Type](https://img.shields.io/badge/Type-Tamagotchi%20Style%20Simulator-ff6b6b?style=flat)
 
-> A terminal-based virtual pet simulator written in C — keep your pet happy, healthy, and entertained by feeding, cleaning, and fulfilling its needs before they run out.
+> A Tamagotchi-style virtual pet care simulator with a FastAPI backend and a live, animated web UI — feed, play with, and take care of your pets while their stats decay in real time, in the background, whether you're watching or not.
 
 ---
 
 ## Overview
 
-The player adopts a virtual pet whose well-being is tracked across multiple attributes — hunger, cleanliness, happiness, and energy. Each attribute decays over time. The player must respond to the pet's needs through menu-driven actions before any stat hits critical levels. The simulation runs on a loop with a simple but engaging state-machine game logic.
+Pet Care Simulator is a full web port of an original C console program, **"Evcil Hayvan Yonetim Sistemi"** (Pet Management System). The mood-calculation logic and its exact thresholds were ported 1:1 from the original C source — including its original quirks — and wrapped in a new real-time web layer: live stat decay, an XP/level system, achievements, and action history.
+
+![Screenshot](screenshot.png)
 
 ## Features
 
-- Virtual pet with multiple tracked stats: hunger, cleanliness, happiness, energy
-- Stats decay over time — neglect leads to a sad or unhealthy pet
-- Actions: feed, clean, play, put to sleep, check status
-- Persistent pet data saved to file between sessions (`evcil_veri.txt`)
-- Visual status output showing each stat as a level
-- Sample output files included for testing (`a_cikti.txt`, `b_cikti.txt`, etc.)
-- Emotion/mood system that reflects the overall state of the pet (`duygu.txt`)
+- **Real-time stat decay** — each pet's energy and happiness drop continuously based on actual elapsed wall-clock time, computed server-side from timestamps (not a fake tick or client-side countdown). Come back after an hour and your pet will genuinely need attention.
+- **Faithful mood engine** — mood (Happy, Sad, Crying, Sleeping, Hungry, Wants to Play) is derived from energy/happiness thresholds copied exactly from the original C `hayvanlar_duygu_durumu()` function, branch order and all.
+- **XP & leveling** — every care action (feed, play, clean, show love, sleep, reward, water) grants XP; pets level up automatically at scaling XP thresholds.
+- **5-badge achievement system** — First Step, 5-Day Care, Happy Family, Star Caretaker, and Crowded House, unlocked by tracking total actions, pet levels, and household size.
+- **Action history log** — every action taken is timestamped and kept in a rolling log, viewable through the UI and the API.
+- **Animated Tamagotchi-style UI** — pet cards with mood-driven emoji animations, live-updating XP/level progress bars, and a household gate that unlocks actions once you have 3+ pets.
+- **Live polling** — the frontend polls the backend periodically so stats, moods, and achievements stay in sync without a page reload.
 
 ## Tech Stack
 
-- **Language:** C (C99 standard)
-- **Storage:** File I/O for session persistence
-- **Logic:** State machine with timed attribute decay
-- **I/O:** Terminal-based interactive menu
+- **Backend:** Python, FastAPI, Pydantic
+- **Templating:** Jinja2
+- **Frontend:** Vanilla JavaScript, HTML, CSS (animated cards, periodic polling for live updates)
+- **State:** In-memory server-side state with server timestamps driving real-time decay
+- **Server:** Uvicorn (ASGI)
+
+## Run Locally
+
+### Prerequisites
+
+- Python 3.11+
+
+### Steps
+
+```bash
+git clone https://github.com/ErdoganPeker/Pet_Care_Simulator.git
+cd Pet_Care_Simulator/app
+
+# Create and activate a virtual environment
+python -m venv venv
+venv\Scripts\activate      # Windows
+source venv/bin/activate   # macOS/Linux
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the app
+python main.py
+```
+
+The app starts on **http://localhost:5013**.
+
+### Run with Docker
+
+```bash
+docker build -t pet-care-simulator .
+docker run -p 8000:8000 pet-care-simulator
+```
+
+The containerized app is served on **http://localhost:8000**.
 
 ## Project Structure
 
 ```
 Pet_Care_Simulator/
-├── main.c              # Core simulator — game loop, state machine, menus
-├── evcil_veri.txt      # Saved pet stats (auto-generated)
-├── duygu.txt           # Pet mood/emotion log
-├── a_cikti.txt         # Sample test output A
-├── aaa_cikti.txt       # Sample test output AAA
-├── b_cikti.txt         # Sample test output B
-├── c_cikti.txt         # Sample test output C
-├── e_cikti.txt         # Sample test output E
-└── .gitignore
+├── app/
+│   ├── main.py            # FastAPI app — routes, decay/XP/achievement logic
+│   ├── requirements.txt   # Python dependencies
+│   └── templates/
+│       └── index.html     # Tamagotchi-style animated UI
+├── main.c                 # Original C console program (ported 1:1)
+├── Dockerfile
+└── screenshot.png
 ```
-
-## Getting Started
-
-### Prerequisites
-
-- GCC or any C99-compatible compiler
-
-### Build & Run
-
-```bash
-git clone https://github.com/ErdoganPeker/Pet_Care_Simulator.git
-cd Pet_Care_Simulator
-gcc -std=c99 -o pet_sim main.c
-./pet_sim
-```
-
-On Windows with MinGW:
-
-```bash
-gcc -std=c99 -o pet_sim.exe main.c
-pet_sim.exe
-```
-
-## Gameplay
-
-```
-Your pet's current status:
-  Hunger    : ████████░░  80%
-  Cleanliness: ██████░░░░  60%
-  Happiness : ███░░░░░░░  30%  <-- your pet is unhappy!
-  Energy    : █████████░  90%
-
-What would you like to do?
-  1. Feed
-  2. Clean
-  3. Play
-  4. Let it sleep
-  5. Check status
-  0. Save & Exit
-```
-
-Pet stats are saved automatically on exit and restored on next launch.
 
 ## Author
 

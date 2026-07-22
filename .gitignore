@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# venv/build artifacts
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.log

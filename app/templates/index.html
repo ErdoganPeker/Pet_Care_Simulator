@@ -1,79 +1,452 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Pet Care Simulator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evcil Hayvan Yonetim Sistemi</title>
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('phs-theme');
+    var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  }catch(e){}
+})();
+</script>
 <style>
+:root{
+  --bg0:#050508; --bg1:#0b0b14; --card:#13131f; --card-border:#1e1e35; --input-bg:#0e0e16;
+  --text:#e2e8f0; --text-dim:#94a3b8; --text-faint:#64748b;
+  --accent1:#7c3aed; --accent2:#00d4ff; --good:#10b981; --warn:#f59e0b; --bad:#ef4444;
+  --shadow:0 0 40px rgba(124,58,237,.08);
+}
+:root[data-theme="light"]{
+  --bg0:#f3f0ff; --bg1:#ffffff; --card:#ffffff; --card-border:#e3ddfb; --input-bg:#f8f7ff;
+  --text:#211a34; --text-dim:#5c5578; --text-faint:#8b84a8;
+  --accent1:#7c3aed; --accent2:#0891b2; --good:#059669; --warn:#d97706; --bad:#dc2626;
+  --shadow:0 4px 24px rgba(124,58,237,.10);
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#050508;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
-.card{background:#13131f;border:1px solid #1e1e35;border-radius:20px;padding:2rem;max-width:400px;width:100%;box-shadow:0 0 60px #7c3aed11;text-align:center}
-.badge{display:inline-block;background:#7c3aed15;border:1px solid #7c3aed33;color:#7c3aed;border-radius:999px;padding:.25rem .75rem;font-size:.75rem;margin-bottom:1rem}
-h1{font-size:1.5rem;font-weight:800;margin-bottom:.25rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.pet-emoji{font-size:5rem;margin:1.5rem 0;display:block;animation:bounce 2s ease-in-out infinite}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.pet-name{font-size:1.25rem;font-weight:700;margin-bottom:.25rem}
-.pet-status{font-size:.9rem;color:#94a3b8;margin-bottom:1.5rem}
-.stat{margin-bottom:.9rem;text-align:left}
-.stat-header{display:flex;justify-content:space-between;font-size:.75rem;color:#94a3b8;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.05em}
-.bar{background:#0e0e16;border-radius:999px;height:8px}
-.fill{height:8px;border-radius:999px;transition:width .5s ease}
-.fill.hunger{background:linear-gradient(90deg,#f59e0b,#ef4444)}
-.fill.happy{background:linear-gradient(90deg,#00d4ff,#7c3aed)}
-.fill.clean{background:linear-gradient(90deg,#10b981,#00d4ff)}
-.fill.energy{background:linear-gradient(90deg,#7c3aed,#f59e0b)}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:1.5rem}
-.btn{padding:.75rem;border:none;border-radius:10px;cursor:pointer;font-size:.85rem;font-weight:700;transition:transform .1s}
-.btn:active{transform:scale(.96)}
-.btn.feed{background:#f59e0b20;border:1px solid #f59e0b40;color:#f59e0b}
-.btn.play{background:#00d4ff20;border:1px solid #00d4ff40;color:#00d4ff}
-.btn.clean{background:#10b98120;border:1px solid #10b98140;color:#10b981}
-.btn.sleep{background:#7c3aed20;border:1px solid #7c3aed40;color:#7c3aed}
+body{
+  background:
+    radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--accent1) 10%, transparent), transparent 45%),
+    radial-gradient(circle at 90% 20%, color-mix(in srgb, var(--accent2) 10%, transparent), transparent 40%),
+    var(--bg0);
+  color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;
+  padding:2rem 1.25rem 4rem;transition:background .25s,color .25s;
+}
+.wrap{max-width:1080px;margin:0 auto}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.75rem;flex-wrap:wrap}
+.htitle{text-align:left}
+.badge{display:inline-block;background:color-mix(in srgb, var(--accent1) 12%, transparent);border:1px solid color-mix(in srgb, var(--accent1) 25%, transparent);color:var(--accent1);border-radius:999px;padding:.25rem .75rem;font-size:.72rem;margin-bottom:.6rem;font-weight:600}
+h1{font-size:1.85rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent1));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{color:var(--text-faint);font-size:.8rem;margin-top:.4rem;max-width:520px}
+.theme-toggle{background:var(--card);border:1px solid var(--card-border);color:var(--text);border-radius:999px;padding:.55rem 1rem;font-size:.85rem;cursor:pointer;font-weight:600;box-shadow:var(--shadow);display:flex;align-items:center;gap:.4rem;transition:transform .15s}
+.theme-toggle:active{transform:scale(.95)}
+
+.banner{background:color-mix(in srgb, var(--warn) 12%, transparent);border:1px solid color-mix(in srgb, var(--warn) 35%, transparent);color:var(--warn);border-radius:12px;padding:.85rem 1rem;font-size:.85rem;margin-bottom:1.5rem;text-align:center;font-weight:600}
+.banner.ok{display:none}
+
+.stats-strip{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.stat-chip{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:.6rem 1rem;font-size:.78rem;color:var(--text-dim);box-shadow:var(--shadow);display:flex;gap:.4rem;align-items:center}
+.stat-chip b{color:var(--text);font-size:.95rem}
+
+.addform{display:flex;gap:.6rem;margin-bottom:2rem;flex-wrap:wrap;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:1rem;box-shadow:var(--shadow)}
+.addform input{flex:1;min-width:140px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:10px;padding:.7rem .9rem;color:var(--text);font-size:.85rem}
+.addform input:focus{outline:none;border-color:var(--accent1)}
+.addform button{background:linear-gradient(135deg,var(--accent2),var(--accent1));border:none;border-radius:10px;padding:.7rem 1.4rem;color:#050508;font-weight:800;cursor:pointer;font-size:.85rem;white-space:nowrap;transition:transform .1s}
+.addform button:active{transform:scale(.96)}
+
+h2.section-title{font-size:1rem;font-weight:800;margin:0 0 .9rem;display:flex;align-items:center;gap:.5rem;color:var(--text)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.1rem;margin-bottom:2.2rem}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:1.3rem 1.3rem 1.5rem;box-shadow:var(--shadow);position:relative;transition:transform .18s,box-shadow .18s}
+.card:hover{transform:translateY(-3px)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.3rem}
+.lvl-badge{background:linear-gradient(135deg,var(--accent2),var(--accent1));color:#050508;font-size:.68rem;font-weight:800;border-radius:999px;padding:.2rem .55rem}
+.card-icon-btns{display:flex;gap:.35rem}
+.icon-btn{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:.95rem;border-radius:6px;padding:.15rem .3rem;line-height:1}
+.icon-btn:hover{color:var(--accent2);background:color-mix(in srgb, var(--accent2) 12%, transparent)}
+.icon-btn.del-btn:hover{color:var(--bad);background:color-mix(in srgb, var(--bad) 12%, transparent)}
+
+.emoji{font-size:3rem;display:block;text-align:center;margin-top:.2rem;animation:bounce 2.4s ease-in-out infinite}
+.emoji.mood-uzgun,.emoji.mood-agliyor{animation:shake 2.6s ease-in-out infinite}
+.emoji.mood-uyuyor{animation:sleepy 3.2s ease-in-out infinite}
+.emoji.mood-ac{animation:wobble 1.6s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-6deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
+@keyframes sleepy{0%,100%{transform:scale(1) translateY(0);opacity:1}50%{transform:scale(.94) translateY(2px);opacity:.75}}
+@keyframes wobble{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(4deg) scale(1.05)}}
+
+.name-wrap{text-align:center;margin-top:.35rem}
+.name{font-size:1.08rem;font-weight:700}
+.name-input{font-size:1rem;font-weight:700;text-align:center;background:var(--input-bg);border:1px solid var(--accent1);border-radius:8px;padding:.25rem .5rem;color:var(--text);width:80%}
+.tur{font-size:.72rem;color:var(--text-faint);text-align:center;text-transform:uppercase;letter-spacing:.05em;margin-top:.15rem}
+
+.mood-chip{display:block;width:fit-content;margin:.6rem auto 1rem;font-size:.72rem;font-weight:700;padding:.25rem .7rem;border-radius:999px}
+.mood-chip-mutlu{background:color-mix(in srgb, var(--good) 16%, transparent);color:var(--good)}
+.mood-chip-uzgun{background:color-mix(in srgb, #64748b 20%, transparent);color:#64748b}
+.mood-chip-agliyor{background:color-mix(in srgb, var(--bad) 16%, transparent);color:var(--bad)}
+.mood-chip-uyuyor{background:color-mix(in srgb, var(--accent1) 16%, transparent);color:var(--accent1)}
+.mood-chip-ac{background:color-mix(in srgb, var(--warn) 18%, transparent);color:var(--warn)}
+.mood-chip-oyun{background:color-mix(in srgb, var(--accent2) 16%, transparent);color:var(--accent2)}
+
+.stat{margin-bottom:.65rem}
+.stat-header{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text-dim);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.04em}
+.bar{background:var(--input-bg);border-radius:999px;height:8px;overflow:hidden;border:1px solid var(--card-border)}
+.fill{height:100%;border-radius:999px;transition:width .5s ease,background .5s ease}
+.xp-row{margin-top:.9rem;margin-bottom:.2rem}
+.xp-bar-bg{height:6px}
+.xp-bar{background:linear-gradient(90deg,#facc15,#f59e0b);height:100%}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:1.1rem}
+.btn{padding:.5rem .4rem;border:1px solid var(--card-border);border-radius:9px;background:var(--input-bg);color:var(--text-dim);cursor:pointer;font-size:.72rem;font-weight:600;transition:transform .1s,opacity .1s,border-color .15s;display:flex;align-items:center;justify-content:center;gap:.3rem}
+.btn:hover:not(:disabled){border-color:var(--accent1);color:var(--text)}
+.btn:active:not(:disabled){transform:scale(.95)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+
+.two-col{display:grid;grid-template-columns:1.1fr .9fr;gap:1.2rem}
+@media (max-width:760px){.two-col{grid-template-columns:1fr}}
+
+.panel{background:var(--card);border:1px solid var(--card-border);border-radius:18px;padding:1.2rem;box-shadow:var(--shadow)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.7rem}
+.badge-card{border:1px solid var(--card-border);border-radius:14px;padding:.8rem .6rem;text-align:center;background:var(--input-bg);opacity:.4;filter:grayscale(1);transition:opacity .25s,filter .25s,transform .2s}
+.badge-card.unlocked{opacity:1;filter:none;border-color:var(--accent1);box-shadow:0 0 18px color-mix(in srgb, var(--accent1) 30%, transparent);background:linear-gradient(160deg,color-mix(in srgb, var(--accent1) 10%, var(--input-bg)),var(--input-bg))}
+.badge-card .b-emoji{font-size:1.7rem;display:block;margin-bottom:.35rem}
+.badge-card .b-name{font-size:.75rem;font-weight:700;margin-bottom:.2rem}
+.badge-card .b-desc{font-size:.64rem;color:var(--text-faint);line-height:1.25}
+.badge-card.unlocked .b-name{color:var(--accent1)}
+
+.history-list{display:flex;flex-direction:column;gap:.5rem;max-height:420px;overflow-y:auto;padding-right:.2rem}
+.hist-item{display:flex;gap:.6rem;align-items:flex-start;font-size:.78rem;padding:.55rem .65rem;border-radius:10px;background:var(--input-bg);border:1px solid var(--card-border)}
+.hist-time{color:var(--text-faint);font-size:.68rem;white-space:nowrap;margin-top:.1rem;min-width:3.4rem}
+.hist-msg{color:var(--text-dim)}
+.hist-empty{color:var(--text-faint);font-size:.8rem;text-align:center;padding:1.5rem 0}
+
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--card-border);padding:.7rem 1.2rem;border-radius:10px;font-size:.85rem;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;box-shadow:var(--shadow);color:var(--text)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:999px}
 </style>
 </head>
 <body>
-<div class="card">
-  <span class="badge">🐾 C Pet Game</span>
-  <h1>Pet Care Simulator</h1>
-  <span class="pet-emoji" id="pet-emoji">{{emoji}}</span>
-  <div class="pet-name" id="pet-name">{{pet.name}}</div>
-  <div class="pet-status" id="pet-status">{{status}}</div>
-  <div class="stat">
-    <div class="stat-header"><span>🍖 Hunger</span><span id="h-val">{{pet.hunger|int}}%</span></div>
-    <div class="bar"><div class="fill hunger" id="h-bar" style="width:{{pet.hunger|int}}%"></div></div>
+<div class="wrap">
+<header>
+  <div class="htitle">
+    <span class="badge">🐾 C → Web port</span>
+    <h1>Evcil Hayvan Yonetim Sistemi</h1>
+    <div class="sub">Orijinal main.c mantigi (esikler, aksiyon on-kosullari, 3+ hayvan kurali) birebir korunuyor; zamanla azalan ihtiyaclar, seviye/XP, rozetler ve gecmis kaydi ustune eklendi.</div>
   </div>
-  <div class="stat">
-    <div class="stat-header"><span>😊 Happiness</span><span id="hp-val">{{pet.happiness|int}}%</span></div>
-    <div class="bar"><div class="fill happy" id="hp-bar" style="width:{{pet.happiness|int}}%"></div></div>
+  <button class="theme-toggle" id="themeToggle" type="button"><span id="themeIcon">🌙</span><span id="themeLabel">Koyu</span></button>
+</header>
+
+<div class="stats-strip">
+  <div class="stat-chip">🐾 Hayvan <b id="statPetCount">{{pets|length}}</b></div>
+  <div class="stat-chip">🏅 Rozet <b id="statBadgeCount">{{achievements|selectattr('kazanildi')|list|length}}/{{achievements|length}}</b></div>
+  <div class="stat-chip">📜 Toplam Aksiyon <b id="statActionCount">-</b></div>
+</div>
+
+<div class="banner {{ 'ok' if unlocked else '' }}" id="banner">
+  ⚠ Aksiyonlar icin en az {{min_pets}} evcil hayvan gerekli (su an {{pets|length}}). Asagidan hayvan ekleyin.
+</div>
+
+<form class="addform" id="addform">
+  <input type="text" id="tur" placeholder="Tur (Kedi, Kopek, Kus...)" required>
+  <input type="text" id="ad" placeholder="Ad" required>
+  <button type="submit">+ Evcil Hayvan Ekle</button>
+</form>
+
+<h2 class="section-title">🐾 Evcil Hayvanlarim</h2>
+<div class="grid" id="grid">
+{% for p in pets %}
+  <div class="card" data-ad="{{p.ad}}">
+    <div class="card-top">
+      <span class="lvl-badge">Lv {{p.level}}</span>
+      <div class="card-icon-btns">
+        <button class="icon-btn rename-btn" data-act="rename" title="Yeniden adlandir">✎</button>
+        <button class="icon-btn del-btn" data-act="delete" title="Sil">✕</button>
+      </div>
+    </div>
+    <span class="emoji mood-{{p.mood_class}}">{{p.emoji}}</span>
+    <div class="name-wrap"><div class="name" data-role="name">{{p.ad}}</div></div>
+    <div class="tur">{{p.tur}}</div>
+    <div class="mood-chip mood-chip-{{p.mood_class}}">{{p.duygu_durumu}}</div>
+    <div class="stat">
+      <div class="stat-header"><span>⚡ Enerji</span><span class="e-val">{{p.enerji}}</span></div>
+      <div class="bar"><div class="fill e-bar" style="width:{{p.enerji}}%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-header"><span>😊 Mutluluk</span><span class="m-val">{{p.mutluluk}}</span></div>
+      <div class="bar"><div class="fill m-bar" style="width:{{p.mutluluk}}%"></div></div>
+    </div>
+    <div class="xp-row">
+      <div class="stat-header"><span>✨ XP</span><span class="xp-val">{{p.xp}}/{{p.next_level_xp}}</span></div>
+      <div class="bar xp-bar-bg"><div class="fill xp-bar" style="width:{{ (p.xp / p.next_level_xp * 100) }}%"></div></div>
+    </div>
+    <div class="actions">
+      {% for a in actions_list %}
+      <button class="btn" data-act="action" data-action-key="{{a.key}}" {{ '' if unlocked else 'disabled' }}>{{a.icon}} {{a.label}}</button>
+      {% endfor %}
+    </div>
   </div>
-  <div class="stat">
-    <div class="stat-header"><span>🛁 Cleanliness</span><span id="c-val">{{pet.cleanliness|int}}%</span></div>
-    <div class="bar"><div class="fill clean" id="c-bar" style="width:{{pet.cleanliness|int}}%"></div></div>
+{% endfor %}
+</div>
+
+<div class="two-col">
+  <div class="panel">
+    <h2 class="section-title">🏆 Basarimlar</h2>
+    <div class="badges" id="badges">
+      {% for a in achievements %}
+      <div class="badge-card {{ 'unlocked' if a.kazanildi else '' }}">
+        <span class="b-emoji">{{a.emoji}}</span>
+        <div class="b-name">{{a.ad}}</div>
+        <div class="b-desc">{{a.aciklama}}</div>
+      </div>
+      {% endfor %}
+    </div>
   </div>
-  <div class="stat">
-    <div class="stat-header"><span>⚡ Energy</span><span id="e-val">{{pet.energy|int}}%</span></div>
-    <div class="bar"><div class="fill energy" id="e-bar" style="width:{{pet.energy|int}}%"></div></div>
-  </div>
-  <div class="actions">
-    <button class="btn feed" onclick="act('feed')">🍖 Feed</button>
-    <button class="btn play" onclick="act('play')">🎮 Play</button>
-    <button class="btn clean" onclick="act('clean')">🛁 Clean</button>
-    <button class="btn sleep" onclick="act('sleep')">😴 Sleep</button>
+  <div class="panel">
+    <h2 class="section-title">📜 Gecmis</h2>
+    <div class="history-list" id="history">
+      {% for h in history %}
+      <div class="hist-item"><span class="hist-time">{{h.zaman_str}}</span><span class="hist-msg">{{h.mesaj}}</span></div>
+      {% else %}
+      <div class="hist-empty">Henuz bir aksiyon yok.</div>
+      {% endfor %}
+    </div>
   </div>
 </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-async function act(action){
-  const r=await fetch('/action/'+action,{method:'POST'});
-  const j=await r.json();
-  const p=j.pet;
-  document.getElementById('pet-emoji').textContent=j.emoji;
-  document.getElementById('pet-status').textContent=j.status;
-  ['h','hp','c','e'].forEach((k,i)=>{
-    const vals=[p.hunger,p.happiness,p.cleanliness,p.energy];
-    const v=Math.round(vals[i]);
-    document.getElementById(k+'-val').textContent=v+'%';
-    document.getElementById(k+'-bar').style.width=v+'%';
-  });
+const ACTIONS_LIST = {{ actions_json | safe }};
+const POLL_MS = 5000;
+
+/* ---------- theme ---------- */
+function applyThemeUI(){
+  const t = document.documentElement.getAttribute('data-theme') || 'dark';
+  document.getElementById('themeIcon').textContent = t === 'dark' ? '🌙' : '☀️';
+  document.getElementById('themeLabel').textContent = t === 'dark' ? 'Koyu' : 'Acik';
 }
+applyThemeUI();
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try{ localStorage.setItem('phs-theme', next); }catch(e){}
+  applyThemeUI();
+});
+
+/* ---------- toast ---------- */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ---------- helpers ---------- */
+function barColor(v){
+  const hue = Math.max(0, Math.min(120, (v/100)*120));
+  return `hsl(${hue}, 75%, 50%)`;
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- pets ---------- */
+function petCardHTML(p, unlocked){
+  const actionsHTML = ACTIONS_LIST.map(a =>
+    `<button class="btn" data-act="action" data-action-key="${a.key}" ${unlocked?'':'disabled'}>${a.icon} ${esc(a.label)}</button>`
+  ).join('');
+  const xpPct = Math.max(0, Math.min(100, (p.xp / p.next_level_xp) * 100));
+  return `
+    <div class="card" data-ad="${esc(p.ad)}">
+      <div class="card-top">
+        <span class="lvl-badge">Lv ${p.level}</span>
+        <div class="card-icon-btns">
+          <button class="icon-btn rename-btn" data-act="rename" title="Yeniden adlandir">✎</button>
+          <button class="icon-btn del-btn" data-act="delete" title="Sil">✕</button>
+        </div>
+      </div>
+      <span class="emoji mood-${p.mood_class}">${p.emoji}</span>
+      <div class="name-wrap"><div class="name" data-role="name">${esc(p.ad)}</div></div>
+      <div class="tur">${esc(p.tur)}</div>
+      <div class="mood-chip mood-chip-${p.mood_class}">${esc(p.duygu_durumu)}</div>
+      <div class="stat">
+        <div class="stat-header"><span>⚡ Enerji</span><span class="e-val">${p.enerji}</span></div>
+        <div class="bar"><div class="fill e-bar" style="width:${p.enerji}%;background:${barColor(p.enerji)}"></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-header"><span>😊 Mutluluk</span><span class="m-val">${p.mutluluk}</span></div>
+        <div class="bar"><div class="fill m-bar" style="width:${p.mutluluk}%;background:${barColor(p.mutluluk)}"></div></div>
+      </div>
+      <div class="xp-row">
+        <div class="stat-header"><span>✨ XP</span><span class="xp-val">${p.xp}/${p.next_level_xp}</span></div>
+        <div class="bar xp-bar-bg"><div class="fill xp-bar" style="width:${xpPct}%"></div></div>
+      </div>
+      <div class="actions">${actionsHTML}</div>
+    </div>`;
+}
+
+function renderPets(pets, unlocked){
+  const grid=document.getElementById('grid');
+  const banner=document.getElementById('banner');
+  banner.classList.toggle('ok', unlocked);
+  banner.textContent = `⚠ Aksiyonlar icin en az {{min_pets}} evcil hayvan gerekli (su an ${pets.length}). Asagidan hayvan ekleyin.`;
+  grid.innerHTML = pets.map(p => petCardHTML(p, unlocked)).join('');
+  document.getElementById('statPetCount').textContent = pets.length;
+  // recolor initial-render bars too (SSR bars have no inline color yet)
+  document.querySelectorAll('.e-bar').forEach(el => { if(!el.style.background) el.style.background = barColor(parseFloat(el.style.width)); });
+  document.querySelectorAll('.m-bar').forEach(el => { if(!el.style.background) el.style.background = barColor(parseFloat(el.style.width)); });
+}
+
+async function refreshPets(){
+  try{
+    const r = await fetch('/api/pets');
+    const j = await r.json();
+    if(r.ok) renderPets(j.pets, j.unlocked);
+  }catch(e){}
+}
+
+/* ---------- achievements ---------- */
+function renderAchievements(list){
+  const el = document.getElementById('badges');
+  el.innerHTML = list.map(a => `
+    <div class="badge-card ${a.kazanildi ? 'unlocked' : ''}">
+      <span class="b-emoji">${a.emoji}</span>
+      <div class="b-name">${esc(a.ad)}</div>
+      <div class="b-desc">${esc(a.aciklama)}</div>
+    </div>`).join('');
+  document.getElementById('statBadgeCount').textContent = `${list.filter(a=>a.kazanildi).length}/${list.length}`;
+}
+
+async function refreshAchievements(){
+  try{
+    const r = await fetch('/api/achievements');
+    const j = await r.json();
+    if(r.ok) renderAchievements(j.achievements);
+  }catch(e){}
+}
+
+/* ---------- history ---------- */
+function renderHistory(items){
+  const el = document.getElementById('history');
+  if(!items.length){ el.innerHTML = '<div class="hist-empty">Henuz bir aksiyon yok.</div>'; return; }
+  el.innerHTML = items.map(h => `
+    <div class="hist-item"><span class="hist-time">${h.zaman_str}</span><span class="hist-msg">${esc(h.mesaj)}</span></div>`).join('');
+  document.getElementById('statActionCount').textContent = items.length + (items.length>=20 ? '+' : '');
+}
+
+async function refreshHistory(){
+  try{
+    const r = await fetch('/api/history?limit=20');
+    const j = await r.json();
+    if(r.ok) renderHistory(j.history);
+  }catch(e){}
+}
+
+async function refreshAll(){
+  await Promise.all([refreshPets(), refreshAchievements(), refreshHistory()]);
+}
+
+/* ---------- forms ---------- */
+document.getElementById('addform').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const tur=document.getElementById('tur').value.trim();
+  const ad=document.getElementById('ad').value.trim();
+  if(!tur||!ad) return;
+  const r=await fetch('/api/pets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tur,ad})});
+  const j=await r.json();
+  if(!r.ok){ toast(j.detail||'Hata'); return; }
+  renderPets(j.pets, j.unlocked);
+  document.getElementById('tur').value=''; document.getElementById('ad').value='';
+  toast(`${ad} eklendi`);
+  refreshHistory(); refreshAchievements();
+});
+
+async function delPet(ad){
+  const r=await fetch('/api/pets/'+encodeURIComponent(ad),{method:'DELETE'});
+  const j=await r.json();
+  if(!r.ok){ toast(j.detail||'Hata'); return; }
+  renderPets(j.pets, j.unlocked);
+  toast(`${ad} silindi`);
+  refreshHistory();
+}
+
+async function renamePet(oldAd, newAd){
+  if(!newAd || newAd === oldAd) return;
+  const r=await fetch('/api/pets/'+encodeURIComponent(oldAd),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({yeni_ad:newAd})});
+  const j=await r.json();
+  if(!r.ok){ toast(j.detail||'Hata'); return; }
+  renderPets(j.pets, j.pets.length >= {{min_pets}});
+  toast(`${oldAd} -> ${newAd}`);
+  refreshHistory();
+}
+
+function startRename(card){
+  const oldAd = card.dataset.ad;
+  const nameWrap = card.querySelector('[data-role="name"]');
+  const input = document.createElement('input');
+  input.type = 'text'; input.className = 'name-input'; input.value = oldAd;
+  nameWrap.replaceWith(input);
+  input.focus(); input.select();
+  const finish = (commit) => {
+    const val = input.value.trim();
+    input.replaceWith(nameWrap);
+    if(commit && val && val !== oldAd) renamePet(oldAd, val);
+  };
+  input.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ finish(true); }
+    else if(e.key === 'Escape'){ finish(false); }
+  });
+  input.addEventListener('blur', () => finish(true));
+}
+
+async function doAction(ad, action){
+  const r=await fetch(`/api/pets/${encodeURIComponent(ad)}/${action}`,{method:'POST'});
+  const j=await r.json();
+  if(!r.ok){ toast(j.detail||'Hata'); return; }
+  const card=document.querySelector(`.card[data-ad="${CSS.escape(ad)}"]`);
+  if(card){
+    const p = j.pet;
+    card.querySelector('.emoji').textContent=p.emoji;
+    card.querySelector('.emoji').className = `emoji mood-${p.mood_class}`;
+    card.querySelector('.mood-chip').textContent=p.duygu_durumu;
+    card.querySelector('.mood-chip').className = `mood-chip mood-chip-${p.mood_class}`;
+    card.querySelector('.e-val').textContent=p.enerji;
+    card.querySelector('.e-bar').style.width=p.enerji+'%';
+    card.querySelector('.e-bar').style.background=barColor(p.enerji);
+    card.querySelector('.m-val').textContent=p.mutluluk;
+    card.querySelector('.m-bar').style.width=p.mutluluk+'%';
+    card.querySelector('.m-bar').style.background=barColor(p.mutluluk);
+    card.querySelector('.xp-val').textContent=`${p.xp}/${p.next_level_xp}`;
+    card.querySelector('.xp-bar').style.width=Math.max(0,Math.min(100,(p.xp/p.next_level_xp)*100))+'%';
+    card.querySelector('.lvl-badge').textContent=`Lv ${p.level}`;
+  }
+  toast(j.message);
+  if(j.leveled_up) toast(`🎉 ${ad} seviye atladi! -> Lv ${j.pet.level}`);
+  refreshAchievements(); refreshHistory();
+}
+
+document.getElementById('grid').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-act]');
+  if(!btn) return;
+  const card = btn.closest('.card');
+  if(!card) return;
+  const ad = card.dataset.ad;
+  const act = btn.dataset.act;
+  if(act === 'delete') delPet(ad);
+  else if(act === 'rename') startRename(card);
+  else if(act === 'action') doAction(ad, btn.dataset.actionKey);
+});
+
+/* ---------- init ---------- */
+refreshHistory();
+setInterval(refreshAll, POLL_MS);
 </script>
 </body>
 </html>
